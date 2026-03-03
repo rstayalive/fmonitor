@@ -85,7 +85,7 @@ foreach ($queues as $qdata) {
 }
 echo '</div>';
 
-echo '</div></div>'; // tab-content + container
+echo '</div></div>';
 
 echo <<< 'JS'
 <script>
