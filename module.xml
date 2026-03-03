@@ -3,7 +3,7 @@
     <rawname>fmonitor</rawname>
     <name>FMonitor - Мониторинг PBX</name>
     <namespace>fmonitor</namespace>
-    <version>4.1.5</version>
+    <version>4.2.1</version>
     <type>tool</type>
     <license>GPLv3+</license>
     <category>Reports</category>

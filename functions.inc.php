@@ -43,6 +43,7 @@ function getStateColor($state) {
     $state = strtoupper($state);
     if (in_array($state, ['IDLE','NOT_INUSE'])) return 'green';
     if (in_array($state, ['INUSE','RINGING','ONHOLD'])) return 'orange';
+    if ($state === 'BUSY') return 'blue';   // ← голубой для "Занят"
     return 'red';
 }
 
@@ -59,7 +60,6 @@ function getQueuesStatus($astman) {
         $line = trim($line);
         if (empty($line)) continue;
 
-        // Новая очередь
         if (preg_match('/^(\d+)\s+has\s+(\d+)\s+calls/', $line, $m)) {
             $currentQueue = $m[1];
             $queues[$currentQueue] = [
@@ -75,7 +75,6 @@ function getQueuesStatus($astman) {
 
         $lower = strtolower($line);
 
-        // ==================== АГЕНТЫ ====================
         if (preg_match('/(Local|PJSIP|SIP)\/(\d+)/', $line, $m) &&
             (strpos($line, 'from-queue') !== false || strpos($lower, 'has taken') !== false)) {
 
@@ -86,6 +85,9 @@ function getQueuesStatus($astman) {
             if (strpos($lower, 'not in use') !== false || strpos($lower, 'idle') !== false) {
                 $statusText = 'Свободен';
                 $statusColor = 'green';
+            } elseif (strpos($lower, 'busy') !== false) {
+                $statusText = 'Занят';
+                $statusColor = 'blue';
             } elseif (strpos($lower, 'in use') !== false || strpos($lower, 'talking') !== false || strpos($lower, 'ringing') !== false || strpos($lower, 'in call') !== false) {
                 $statusText = 'В разговоре';
                 $statusColor = 'orange';
@@ -103,33 +105,28 @@ function getQueuesStatus($astman) {
             ];
         }
 
-        // ==================== ЗВОНКИ В ОЖИДАНИИ ====================
         if (preg_match('/^(\d+)\.\s+(.+?)\s+\(wait:\s*([\d:]+)/i', $line, $m)) {
             $position = (int)$m[1];
             $raw = trim($m[2]);
-            $waitStr = $m[3];
+            $waitFormatted = $m[3];
 
             $callerID = 'Неизвестно';
-            if (preg_match('/(?:PJSIP|SIP)\/(\d+)/', $raw, $cm)) {
+            if (preg_match('/(?:PJSIP|SIP)\/(.+?)(?=-\d{4,})/', $raw, $cm)) {
                 $callerID = $cm[1];
-            }
-
-            $waitSeconds = 0;
-            if (preg_match('/(\d+):(\d{1,2})/', $waitStr, $wm)) {
-                $waitSeconds = (int)$wm[1] * 60 + (int)$wm[2];
-            } elseif (is_numeric($waitStr)) {
-                $waitSeconds = (int)$waitStr;
+            } elseif (preg_match('/(?:PJSIP|SIP)\/([^-\s]+)/', $raw, $cm)) {
+                $callerID = $cm[1];
+            } elseif (preg_match('/(\d{6,})/', $raw, $cm)) {
+                $callerID = $cm[1];
             }
 
             $queues[$currentQueue]['callers'][] = [
                 'position' => $position,
                 'callerid' => $callerID,
-                'wait' => $waitSeconds
+                'wait'     => $waitFormatted
             ];
         }
     }
 
-    // Сортировка звонков по позиции
     foreach ($queues as &$q) {
         usort($q['callers'], fn($a, $b) => $a['position'] <=> $b['position']);
     }

@@ -14,7 +14,7 @@ $queues = getQueuesStatus($astman);
 echo '<div class="container-fluid">';
 echo '<h1><i class="fa fa-dashboard"></i> FMonitor — Мониторинг в реальном времени</h1>';
 
-// ==================== ИЗБРАННЫЕ ====================
+// Избранные
 echo '<div class="panel panel-primary">';
 echo '<div class="panel-heading"><strong>⭐ Избранные номера</strong></div>';
 echo '<div class="panel-body" id="favorites-panel">';
@@ -38,7 +38,7 @@ foreach ($allExts as $e) {
     $ext = $e['extension'];
     $name = htmlspecialchars($e['name'] ?: '—');
     $st = $statuses[$ext] ?? ['text'=>'Неизвестно', 'color'=>'gray'];
-    $colorClass = $st['color'] === 'green' ? 'success' : ($st['color'] === 'orange' ? 'warning' : 'danger');
+    $colorClass = $st['color'] === 'green' ? 'success' : ($st['color'] === 'orange' ? 'warning' : ($st['color'] === 'blue' ? 'info' : 'danger'));
 
     echo "<tr data-ext='$ext'>
         <td><button class='btn btn-xs btn-star' data-ext='$ext'>☆</button></td>
@@ -49,7 +49,7 @@ foreach ($allExts as $e) {
 }
 echo '</tbody></table></div>';
 
-// ==================== ОЧЕРЕДИ ====================
+// Очереди
 echo '<div id="tab-queues" class="tab-pane active">';
 echo '<h3>Очереди <small class="pull-right">Автообновление каждые 8 сек</small></h3>';
 
@@ -66,7 +66,8 @@ foreach ($queues as $qdata) {
         echo "<table class='table table-sm'>";
         echo "<tr><th>Номер</th><th>Статус</th><th>Принял звонков</th></tr>";
         foreach ($qdata['members'] as $m) {
-            $badge = $m['status']['color'] === 'green' ? 'success' : ($m['status']['color'] === 'orange' ? 'warning' : 'danger');
+            $c = $m['status']['color'];
+            $badge = $c === 'green' ? 'success' : ($c === 'orange' ? 'warning' : ($c === 'blue' ? 'info' : 'danger'));
             echo "<tr><td>{$m['ext']}</td><td><span class='label label-$badge'>{$m['status']['text']}</span></td><td>{$m['calls_taken']}</td></tr>";
         }
         echo "</table>";
@@ -91,7 +92,6 @@ echo <<< 'JS'
 <script>
 $(function() {
     let favorites = JSON.parse(localStorage.getItem('fmonitor_fav') || '[]');
-
     let savedTab = localStorage.getItem('fmonitor_tab') || '#tab-queues';
     $('.nav-tabs a[href="' + savedTab + '"]').tab('show');
 
@@ -142,7 +142,6 @@ $(function() {
     });
 
     renderFavorites();
-
     setInterval(() => location.reload(), 8000);
 });
 </script>
