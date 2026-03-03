@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+    <rawname>fmonitor</rawname>
+    <name>FMonitor - Мониторинг PBX</name>
+    <namespace>fmonitor</namespace>
+    <version>4.1.5</version>
+    <type>tool</type>
+    <license>GPLv3+</license>
+    <category>Reports</category>
+    <description>Реал-тайм мониторинг внутренних номеров, очередей и агентов (избранное + цветовые статусы)</description>
+    <publisher>telephonization.ru</publisher>
+    <menuitems>
+        <fmonitor requires_auth="true">FMonitor</fmonitor>
+    </menuitems>
+    <supported>
+        <version>17.0</version>
+    </supported>
+    <depends>
+        <module>core</module>
+    </depends>
+</module>
